@@ -45,7 +45,8 @@ window.onload = function () {
         return
     }
     // 创建program
-    makeClassicScene();
+    //makeClassicScene()
+    scene2();
     generateTracer();
 
     changeEye();
@@ -132,4 +133,12 @@ function makeClassicScene() {
     objects.push(new myCube(2, Vector.create([-0.9, -0.4, -0.5]), Vector.create([0.6, 0.6, -0.1]), 2));
     objects.push(new mySphere(1, Vector.create([0.6, 0.0, 0.0]), 0.4, 1));
     objects.push(new mySphere(2, Vector.create([-0.3, -0.6, 0.6]), 0.3, 2));
+}
+
+function scene2() {
+    objects.push(new myLightSource(Vector.create([0.3, 0.0, 0.3])));
+    objects.push(new mySphere(1, Vector.create([0.0, 0.75, 0]), 0.25, 1));
+    objects.push(new mySphere(2, Vector.create([0.0, 0.25, 0]), 0.25, 2));
+    objects.push(new mySphere(3, Vector.create([0.0, -0.25, 0]), 0.25, 3));
+    objects.push(new mySphere(4, Vector.create([0.0, -0.75, 0]), 0.25, 1));
 }

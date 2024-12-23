@@ -12,29 +12,22 @@ float seed = 0.93725856;
 struct Cube {
     vec3 minCorner;
     vec3 maxCorner;
-    int material;
 };
 struct Sphere {
     vec3 center;
     float radius;
-    int material;
-};
-struct Ray {
-    vec3 origin;
-    vec3 direction;
-    int bounceNum;
 };
 struct LightSource {
     vec3 position;
     float intensity;
     float lightSize;
 };
-Cube room = Cube(vec3(-1.0, -1.0, -1.0), vec3(1.0, 1.0, 1.0), 1);
+Cube room = Cube(vec3(-1.0, -1.0, -1.0), vec3(1.0, 1.0, 1.0));
 LightSource light = LightSource(vec3(0, 0.8, 0), 0.8, 0.2);
-Cube c1 = Cube(vec3(0.3, -1, 0.3), vec3(0.6, 0, 0.9), 1);
-Cube c2 = Cube(vec3(-0.9, -0.4, -0.5), vec3(0.6, 0.6, -0.1), 2);
-Sphere s1 = Sphere(vec3(0.6, 0, 0), 0.4, 1);
-Sphere s2 = Sphere(vec3(-0.3, -0.6, 0.6), 0.4, 2);
+Sphere s1 = Sphere(vec3(0, 0.75, 0), 0.25);
+Sphere s2 = Sphere(vec3(0, 0.25, 0), 0.25);
+Sphere s3 = Sphere(vec3(0, -0.25, 0), 0.25);
+Sphere s4 = Sphere(vec3(0, -0.75, 0), 0.25);
 float intersectSphere(vec3 origin, vec3 direction, Sphere sphere) {
     vec3 toSphere = origin - sphere.center;
     float a = dot(direction, direction);
@@ -107,16 +100,17 @@ vec3 normalOfSphere(vec3 point, Sphere sphere) {
     return normalize(point - sphere.center);
 }
 float shadow(vec3 origin, vec3 ray) {
-    vec2 tCube1 = intersectCube(origin, ray, c1);
-    if(tCube1.x > 0.0 && tCube1.x < 1.0 && tCube1.x < tCube1.y) {
-        return 0.0;
-    }
-    vec2 tCube2 = intersectCube(origin, ray, c2);
-    if(tCube2.x > 0.0 && tCube2.x < 1.0 && tCube2.x < tCube2.y) {
-        return 0.0;
-    }
     float tSphere1 = intersectSphere(origin, ray, s1);
     if(tSphere1 < 1.0)
+        return 0.0;
+    float tSphere2 = intersectSphere(origin, ray, s2);
+    if(tSphere2 < 1.0)
+        return 0.0;
+    float tSphere3 = intersectSphere(origin, ray, s3);
+    if(tSphere3 < 1.0)
+        return 0.0;
+    float tSphere4 = intersectSphere(origin, ray, s4);
+    if(tSphere4 < 1.0)
         return 0.0;
     return 1.0;
 }
@@ -126,20 +120,20 @@ vec3 calculateColor(vec3 origin, vec3 direction, float seed) {
     for(int bounce = 0; bounce < MAX_BOUNCE; bounce++) {
         float t = INFINITY + 1.0;
         vec2 tRoom = intersectCube(origin, direction, room);
-        vec2 tCube1 = intersectCube(origin, direction, c1);
-        vec2 tCube2 = intersectCube(origin, direction, c2);
         float tSphere1 = intersectSphere(origin, direction, s1);
         float tSphere2 = intersectSphere(origin, direction, s2);
+        float tSphere3 = intersectSphere(origin, direction, s3);
+        float tSphere4 = intersectSphere(origin, direction, s4);
         if(tRoom.x < tRoom.y)
             t = tRoom.y;
-        if(tCube1.x > 0.0 && tCube1.x < tCube1.y && tCube1.x < t)
-            t = tCube1.x;
-        if(tCube2.x > 0.0 && tCube2.x < tCube2.y && tCube2.x < t)
-            t = tCube2.x;
         if(t > tSphere1)
             t = tSphere1;
         if(t > tSphere2)
             t = tSphere2;
+        if(t > tSphere3)
+            t = tSphere3;
+        if(t > tSphere4)
+            t = tSphere4;
         if(t > INFINITY) {
             accumulatedColor += SCENE_COLOR;
             break;
@@ -152,23 +146,16 @@ vec3 calculateColor(vec3 origin, vec3 direction, float seed) {
             normal = -normalOfCube(hitPoint, room);
             surfaceColor = colorOnRoom(hitPoint);
         }
-        if(t == tCube1.x && tCube1.x < tCube1.y)
-            normal = normalOfCube(hitPoint, c1);
-        if(t == tCube2.x && tCube2.x < tCube2.y)
-            normal = normalOfCube(hitPoint, c2);
         if(t == tSphere1)
             normal = normalOfSphere(hitPoint, s1);
         if(t == tSphere2)
             normal = normalOfSphere(hitPoint, s2);
+        if(t == tSphere3)
+            normal = normalOfSphere(hitPoint, s3);
+        if(t == tSphere4)
+            normal = normalOfSphere(hitPoint, s4);
         origin = hitPoint;
         if(false) {
-        } else if(t == tCube1.x && tCube1.x < tCube1.y) {
-            direction = cosineWeightedDirection(seed, normal);
-        } else if(t == tCube2.x && tCube2.x < tCube2.y) {
-            direction = reflect(direction, normal);
-            vec3 reflectedLight = normalize(reflect(light.position - hitPoint, normal));
-            specularHighlight = max(0.0, dot(reflectedLight, normalize(hitPoint - origin)));
-            specularHighlight = 2.0 * pow(specularHighlight, 20.0);
         } else if(t == tSphere1) {
             direction = cosineWeightedDirection(seed, normal);
         } else if(t == tSphere2) {
@@ -176,6 +163,13 @@ vec3 calculateColor(vec3 origin, vec3 direction, float seed) {
             vec3 reflectedLight = normalize(reflect(light.position - hitPoint, normal));
             specularHighlight = max(0.0, dot(reflectedLight, normalize(hitPoint - origin)));
             specularHighlight = 2.0 * pow(specularHighlight, 20.0);
+        } else if(t == tSphere3) {
+            direction = normalize(reflect(direction, normal)) + getNormalizedRandomDirection(seed) * 0.6;
+            vec3 reflectedLight = normalize(reflect(light.position - hitPoint, normal));
+            specularHighlight = max(0.0, dot(reflectedLight, normalize(hitPoint - origin)));
+            specularHighlight = pow(specularHighlight, 3.0);
+        } else if(t == tSphere4) {
+            direction = cosineWeightedDirection(seed, normal);
         } else {
             direction = cosineWeightedDirection(seed, normal);
         }

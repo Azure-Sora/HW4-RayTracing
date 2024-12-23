@@ -6,7 +6,7 @@ function makeFragmentShader(objects) {
         colorOnRoom +
         randoms +
         normals +
-        shadow +
+        makeShadow(objects) +
         makeCalculateColor(objects) +
         main;
     return shader;
@@ -32,6 +32,9 @@ class myLightSource {
         return '';
     }
     getCalculateColorNextRay() {
+        return '';
+    }
+    getShadow() {
         return '';
     }
 }
@@ -97,6 +100,13 @@ class myCube {
                 '}'
         }
     }
+    getShadow() {
+        return '\
+        vec2 tCube'+ this.id + ' = intersectCube(origin, ray, c' + this.id + ');\
+        if(tCube'+ this.id + '.x > 0.0 && tCube' + this.id + '.x < 1.0 && tCube' + this.id + '.x < tCube' + this.id + '.y) {\
+        return 0.0;\
+        }';
+    }
 }
 
 class mySphere {
@@ -151,6 +161,12 @@ class mySphere {
                 specularHighlight = pow(specularHighlight, 3.0);' +
                 '}'
         }
+    }
+    getShadow() {
+        return '\
+        float tSphere' + this.id + ' = intersectSphere(origin, ray, s' + this.id + ');\
+        if(tSphere' + this.id + ' < 1.0)\
+        return 0.0;';
     }
 
 }
@@ -301,22 +317,15 @@ vec3 normalOfSphere(vec3 point, Sphere sphere) {\
 }\
 ';
 
-let shadow = '\
-float shadow(vec3 origin, vec3 ray) {\
-    vec2 tCube1 = intersectCube(origin, ray, c1);\
-    if(tCube1.x > 0.0 && tCube1.x < 1.0 && tCube1.x < tCube1.y) {\
-        return 0.0;\
-    }\
-    vec2 tCube2 = intersectCube(origin, ray, c2);\
-    if(tCube2.x > 0.0 && tCube2.x < 1.0 && tCube2.x < tCube2.y) {\
-        return 0.0;\
-    }\
-    float tSphere1 = intersectSphere(origin, ray, s1);\
-    if(tSphere1 < 1.0)\
-        return 0.0;\
-    return 1.0;\
+function makeShadow(objects) {
+    return '\
+    float shadow(vec3 origin, vec3 ray) {'+
+        concat(objects, function (o) { return o.getShadow(); }) +
+        'return 1.0;\
 }\
 ';
+}
+
 
 function makeCalculateColor(objects) {
     return '\
