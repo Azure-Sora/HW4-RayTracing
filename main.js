@@ -107,7 +107,6 @@ function makeTracer() {
     }
     let tracerVertexShaderSource = loadFileAJAX('./shaders/tracer.vert');
     let tracerFragmentShaderSource = makeFragmentShader(objects);
-    //console.log(tracerFragmentShaderSource);
     tracerProgram = createProgram(gl, tracerVertexShaderSource, tracerFragmentShaderSource);
     tracerVertexAttribute = gl.getAttribLocation(tracerProgram, 'vertex');
     gl.vertexAttribPointer(tracerVertexAttribute, 2, gl.FLOAT, false, 0, 0);
@@ -248,8 +247,8 @@ function sceneClassic() {
     objectID = 0;
     objects.push(new myLightSource(Vector.create([0.0, 0.8, 0.0])));
     objects.push(new myCube(objectID++, Vector.create([0.3, -1.0, 0.3]), Vector.create([0.6, 0.0, 0.9]), 1));
-    objects.push(new myCube(objectID++, Vector.create([-0.9, -0.4, -0.5]), Vector.create([0.6, 0.6, -0.1]), 2));
-    objects.push(new mySphere(objectID++, Vector.create([0.6, 0.0, 0.0]), 0.4, 1));
+    objects.push(new myCube(objectID++, Vector.create([-0.9, -1.0, -0.5]), Vector.create([0.6, 0.6, -0.1]), 2));
+    objects.push(new mySphere(objectID++, Vector.create([0.6, 0.3, 0.6]), 0.2, 3));
     objects.push(new mySphere(objectID++, Vector.create([-0.3, -0.6, 0.6]), 0.3, 2));
     objectCount = 4;
     selectedObject = objects[0];
