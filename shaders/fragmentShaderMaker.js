@@ -3,7 +3,7 @@ function makeFragmentShader(objects) {
         start +
         concat(objects, function (o) { return o.makeObject(); }) +
         intersect +
-        colorOnRoom +
+        [blueAndyellowRoom, redAndGreenRoom, colorfulRoom][roomColorType] +
         randoms +
         normals +
         makeShadow(objects) +
@@ -12,12 +12,26 @@ function makeFragmentShader(objects) {
     return shader;
 }
 
+// struct Cube {
+//     vec3 minCorner;
+//     vec3 maxCorner;
+// };
+// struct Sphere {
+//     vec3 center;
+//     float radius;
+// };
+// struct LightSource {
+//     vec3 position;
+//     float intensity;
+//     float lightSize;
+// };
+
 class myLightSource {
     constructor(position) {
         this.position = position;
     }
     makeObject() {
-        return 'LightSource light = LightSource(' + vec3ToStr(this.position) + ', 0.8, 0.2);'
+        return 'LightSource light = LightSource(' + vec3ToStr(this.position) + ', 0.8, 0.1);'
     }
     getDiffuseIntensity() {
         return '';
@@ -51,6 +65,12 @@ class myCube {
         this.cubeMax = cubeMax;
         this.material = material;
     }
+    getMinCorner() {
+        return this.cubeMin;
+    };
+    getMaxCorner() {
+        return this.cubeMax;
+    };
     makeObject() {
         return 'Cube c' +
             this.id +
@@ -116,6 +136,12 @@ class mySphere {
         this.radius = radius;
         this.material = material;
     }
+    getMinCorner() {
+        return this.center.subtract(Vector.create([this.radius, this.radius, this.radius]));
+    };
+    getMaxCorner() {
+        return this.center.add(Vector.create([this.radius, this.radius, this.radius]));
+    };
     makeObject() {
         return 'Sphere s' +
             this.id +
@@ -189,7 +215,10 @@ const float INFINITY = 1000000.0;\
 const vec3 SCENE_COLOR = vec3(0.1, 0.1, 0.1);\
 const vec3 WHITE = vec3(1.0);\
 const int MAX_BOUNCE = 5;\
-const int SAMPLE_NUM = 50;\
+const int SAMPLE_NUM = 100;\
+uniform sampler2D texture;\
+uniform float textureWeight;\
+uniform float rdSeed;\
 varying vec3 initialRay;\
 \
 uniform vec3 eye;\
@@ -238,7 +267,7 @@ vec2 intersectCube(vec3 origin, vec3 ray, Cube cube) {\
 }\
 ';
 
-let colorOnRoom = '\
+let blueAndyellowRoom = '\
 vec3 colorOnRoom(vec3 position) {\
     if(position.x < -0.9999) {\
         return vec3(0.1, 0.5, 1.0);\
@@ -249,26 +278,31 @@ vec3 colorOnRoom(vec3 position) {\
 }\
 ';
 
-// function makeDiffuseIntensity(objects) {
-//     return '\
-//     float getDiffuseIntensity(vec3 point, vec3 normal, LightSource lightSource) {\
-//     vec3 toLightSource = lightSource.position - point;\
-//     float t = INFINITY + 1.0;\
-//     vec2 tRoom = intersectCube(point, toLightSource, room);'+
-//         concat(objects, function (o) { return o.getDiffuseIntensity(); }) +
-//         'if(tRoom.x < tRoom.y)\
-//         t = tRoom.y;'+
-//         concat(objects, function (o) { return o.makeIfT(); }) +
-//         'if(t < 1.0) {\
-//       \
-//         return 0.0;\
-//     } else {\
-//     \
-//         return max(0.0, dot(normalize(toLightSource), normal)) * light.intensity;\
-//     }\
-//     }\
-// ';
-// }
+let redAndGreenRoom = '\
+vec3 colorOnRoom(vec3 position) {\
+    if(position.x < -0.9999) {\
+        return vec3(1.0, 0.3, 0.1);\
+    } else if(position.x > 0.9999) {\
+        return vec3(0.3, 1.0, 0.1);\
+    }\
+    return WHITE;\
+}\
+';
+
+let colorfulRoom = '\
+vec3 colorOnRoom(vec3 position) {\
+    if(position.x < -0.9999) {\
+        return vec3(1.0, 0.3, 0.1);\
+    } else if(position.x > 0.9999) {\
+        return vec3(0.3, 1.0, 0.1);\
+    } else if (position.z > 0.9999) {\
+        return vec3(0.1, 0.5, 1.0); }\
+    else if (position.z < -0.9999) {\
+        return vec3(1.0, 0.9, 0.1); }\
+    return WHITE;\
+}\
+';
+
 let randoms = '\
 float random(vec3 scale, float seed) {\
     return fract(sin(dot(gl_FragCoord.xyz + seed, scale)) * 43758.5453 + seed);\
@@ -382,14 +416,17 @@ function makeCalculateColor(objects) {
     ';
 };
 
+
 let main = '\
 void main() {\
-    light.position += getNormalizedRandomDirection(seed) * light.lightSize;\
+    light.position += getNormalizedRandomDirection(rdSeed) * light.lightSize;\
+    vec3 texture = texture2D(texture, gl_FragCoord.xy / 512.0).rgb;\
     vec3 sumColor = vec3(0.0);\
     for(int i = 0; i < SAMPLE_NUM; i++) {\
         sumColor = sumColor + calculateColor(eye, initialRay, seed);\
-        seed += 1.4732648392;\
+        seed += 1.1145141919;\
     }\
-    gl_FragColor = vec4(sumColor / float(SAMPLE_NUM), 1.0);\
+    \
+    gl_FragColor = vec4(mix(sumColor / float(SAMPLE_NUM), texture, textureWeight), 1.0);\
 }\
 ';

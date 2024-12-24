@@ -6,6 +6,67 @@
     <div style="text-align: center">
         <canvas id='canvas' width="512" height="512"></canvas>
     </div>
+    <div style="text-align: center">
+        <label for="scene">选择预设场景：</label>
+        <select id="scene" onchange="newScene()">
+            <option value="0">经典场景</option>
+            <option value="1">堆叠球体</option>
+            <option value="2">桌子椅子</option>
+
+        </select>
+        <p id="lightTipStr"></p>
+        <div>
+            <label>添加球体：</label>
+            <label for="centerX">球心X</label>
+            <input type="text" id="centerX" size="5">
+            <label for="centerY">球心Y</label>
+            <input type="text" id="centerY" size="5">
+            <label for="centerZ">球心Z</label>
+            <input type="text" id="centerZ" size="5">
+            <label for="radius">半径</label>
+            <input type="text" id="radius" size="5">
+            <label for="sphereMaterial">材质</label>
+            <select id="sphereMaterial">
+                <option value="1">漫反射</option>
+                <option value="2">镜面</option>
+                <option value="3">磨砂</option>
+            </select>
+            <button type="button" onclick="addSphere()">添加球体</button>
+        </div>
+        <div>
+            <label>添加立方体：</label>
+
+            <label for="minX">左下角X</label>
+            <input type="text" id="minX" size="5">
+            <label for="minY">左下角X</label>
+            <input type="text" id="minY" size="5">
+            <label for="minZ">左下角Z</label>
+            <input type="text" id="minZ" size="5">
+
+            <label for="maxX">右上角X</label>
+            <input type="text" id="maxX" size="5">
+            <label for="maxY">右上角Y</label>
+            <input type="text" id="maxY" size="5">
+            <label for="maxZ">右上角Z</label>
+            <input type="text" id="maxZ" size="5">
+
+            <label for="cubeMaterial">材质</label>
+            <select id="cubeMaterial">
+                <option value="1">漫反射</option>
+                <option value="2">镜面</option>
+                <option value="3">磨砂</option>
+            </select>
+            <button type="button" onclick="addCube()">添加立方体</button>
+        </div>
+
+        <div>
+            <label for="selectedObj">选中物体（白框高亮）：</label>
+            <select id="selectedObj" onchange="changeSelectedObject()">
+
+            </select>
+            <button type="button" onclick="deleteObject()">删除物体</button>
+        </div>
+    </div>
     <script type="text/javascript" src="./common/sylvester.src.js"></script>
     <script type="text/javascript" src="./common/glUtils.js"></script>
     <script type="text/javascript" src="./common/myUtils.js"></script>
