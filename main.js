@@ -1,5 +1,4 @@
-// 用来画占满整个画面的两个三角形
-const vertices = [
+const vertices = [//铺满画面的三角形
     -1, -1,
     1, -1,
     1, 1,
@@ -8,7 +7,7 @@ const vertices = [
     -1, -1,
 ]
 
-const lineVertices = [
+const lineVertices = [//选中框
     0, 0, 0,
     1, 0, 0,
     0, 1, 0,
@@ -64,7 +63,7 @@ function changeEye() {
 }
 
 window.onload = function () {
-    // 初始化阶段
+
     canvas = document.querySelector('#canvas')
     gl = canvas.getContext('webgl')
 
@@ -72,7 +71,7 @@ window.onload = function () {
         console.log('WebGL not supported!')
         return
     }
-    // 创建program
+
 
     initVertexBuffer();
     initFramebuffer();
@@ -108,7 +107,7 @@ function makeTracer() {
     }
     let tracerVertexShaderSource = loadFileAJAX('./shaders/tracer.vert');
     let tracerFragmentShaderSource = makeFragmentShader(objects);
-    console.log(tracerFragmentShaderSource);
+    //console.log(tracerFragmentShaderSource);
     tracerProgram = createProgram(gl, tracerVertexShaderSource, tracerFragmentShaderSource);
     tracerVertexAttribute = gl.getAttribLocation(tracerProgram, 'vertex');
     gl.vertexAttribPointer(tracerVertexAttribute, 2, gl.FLOAT, false, 0, 0);
@@ -126,7 +125,7 @@ function initRender() {
 }
 
 function initLineShader() {
-    // create line shader
+
     let lineVertexSource = loadFileAJAX('./shaders/line.vert');
     let lineFragmentSource = loadFileAJAX('./shaders/line.frag');
     lineProgram = createProgram(gl, lineVertexSource, lineFragmentSource);
@@ -134,12 +133,10 @@ function initLineShader() {
     gl.enableVertexAttribArray(lineVertexAttribute);
     gl.useProgram(lineProgram);
 
-    // create vertex buffer
     lineVertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, lineVertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lineVertices), gl.STATIC_DRAW);
 
-    // create index buffer
     lineIndexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lineIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(lineIndices), gl.STATIC_DRAW);
