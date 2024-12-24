@@ -108,6 +108,7 @@ function makeTracer() {
     }
     let tracerVertexShaderSource = loadFileAJAX('./shaders/tracer.vert');
     let tracerFragmentShaderSource = makeFragmentShader(objects);
+    console.log(tracerFragmentShaderSource);
     tracerProgram = createProgram(gl, tracerVertexShaderSource, tracerFragmentShaderSource);
     tracerVertexAttribute = gl.getAttribLocation(tracerProgram, 'vertex');
     gl.vertexAttribPointer(tracerVertexAttribute, 2, gl.FLOAT, false, 0, 0);
@@ -254,21 +255,21 @@ function sceneClassic() {
     objects.push(new mySphere(objectID++, Vector.create([0.6, 0.0, 0.0]), 0.4, 1));
     objects.push(new mySphere(objectID++, Vector.create([-0.3, -0.6, 0.6]), 0.3, 2));
     objectCount = 4;
-    selectedObject = objects[1];
-    lightPosTipStr = '本场景光源位置：0.0, 0.8, 0.0，注意请勿遮挡';
+    selectedObject = objects[0];
+    lightPosTipStr = '光源位置：0.0, 0.8, 0.0，注意请勿遮挡';
 }
 
 function sceneStackedSphere() {
     objects = [];
     objectID = 0;
-    objects.push(new myLightSource(Vector.create([0.3, 0.0, 0.3])));
+    objects.push(new myLightSource(Vector.create([0.6, 0.0, 0.6])));
     objects.push(new mySphere(objectID++, Vector.create([0.0, 0.75, 0]), 0.25, 1));
     objects.push(new mySphere(objectID++, Vector.create([0.0, 0.25, 0]), 0.25, 2));
     objects.push(new mySphere(objectID++, Vector.create([0.0, -0.25, 0]), 0.25, 3));
     objects.push(new mySphere(objectID++, Vector.create([0.0, -0.75, 0]), 0.25, 1));
     objectCount = 4;
-    selectedObject = objects[1];
-    lightPosTipStr = '本场景光源位置：0.3, 0.0, 0.3，注意请勿遮挡';
+    selectedObject = objects[0];
+    lightPosTipStr = '光源位置：0.3, 0.0, 0.3，注意请勿遮挡';
 }
 
 function sceneTableAndChair() {
@@ -276,34 +277,34 @@ function sceneTableAndChair() {
     objectID = 0;
 
     objects.push(new myLightSource(Vector.create([0.0, 0.8, 0.0])));
-    // table top
+    // 桌板
     objects.push(new myCube(objectID++, Vector.create([-0.5, -0.35, -0.5]), Vector.create([0.3, -0.3, 0.5]), 2));
 
-    // table legs
+    // 桌腿
     objects.push(new myCube(objectID++, Vector.create([-0.45, -1, -0.45]), Vector.create([-0.4, -0.35, -0.4]), 2));
     objects.push(new myCube(objectID++, Vector.create([0.2, -1, -0.45]), Vector.create([0.25, -0.35, -0.4]), 2));
     objects.push(new myCube(objectID++, Vector.create([-0.45, -1, 0.4]), Vector.create([-0.4, -0.35, 0.45]), 2));
     objects.push(new myCube(objectID++, Vector.create([0.2, -1, 0.4]), Vector.create([0.25, -0.35, 0.45]), 2));
 
-    // chair seat
+    // 椅面
     objects.push(new myCube(objectID++, Vector.create([0.3, -0.6, -0.2]), Vector.create([0.7, -0.55, 0.2]), 1));
 
-    // chair legs
+    // 椅腿
     objects.push(new myCube(objectID++, Vector.create([0.3, -1, -0.2]), Vector.create([0.35, -0.6, -0.15]), 1));
     objects.push(new myCube(objectID++, Vector.create([0.3, -1, 0.15]), Vector.create([0.35, -0.6, 0.2]), 1));
     objects.push(new myCube(objectID++, Vector.create([0.65, -1, -0.2]), Vector.create([0.7, 0.1, -0.15]), 1));
     objects.push(new myCube(objectID++, Vector.create([0.65, -1, 0.15]), Vector.create([0.7, 0.1, 0.2]), 1));
 
-    // chair back
+    // 椅背
     objects.push(new myCube(objectID++, Vector.create([0.65, 0.05, -0.15]), Vector.create([0.7, 0.1, 0.15]), 1));
     objects.push(new myCube(objectID++, Vector.create([0.65, -0.55, -0.09]), Vector.create([0.7, 0.1, -0.03]), 1));
     objects.push(new myCube(objectID++, Vector.create([0.65, -0.55, 0.03]), Vector.create([0.7, 0.1, 0.09]), 1));
 
-    // sphere on table
+    // 一个球
     objects.push(new mySphere(objectID++, Vector.create([-0.1, -0.05, 0]), 0.25, 3));
     objectCount = 14;
-    selectedObject = objects[1];
-    lightPosTipStr = '本场景光源位置：0.0, 0.8, 0.0，注意请勿遮挡';
+    selectedObject = objects[0];
+    lightPosTipStr = '光源位置：0.0, 0.8, 0.0，注意请勿遮挡';
 }
 
 function refresh() {
@@ -336,6 +337,7 @@ function changeScene() {
     } else {
         interval = setInterval(render, 17);
     }
+    refreshObjectSelect();
 }
 
 function addSphere() {
@@ -404,10 +406,52 @@ function addCube() {
     changeScene();
 }
 
-function changeSelectedObject() {
+function refreshObjectSelect() {
+    let selectBox = document.getElementById("selectedObj");
+    selectBox.options.length = 0;
+    for (let i = 0; i < objects.length; i++) {
+        let objName;
+        if (objects[i] instanceof myLightSource) {
+            objName = 'LightSource';
+        } else if (objects[i] instanceof myCube) {
+            objName = 'Cube';
+        } else if (objects[i] instanceof mySphere) {
+            objName = 'Sphere';
+        }
+        objName += i;
+        let opt = new Option(objName, i);
+        selectBox.options.add(opt);
+    }
+}
 
+function changeSelectedObject() {
+    let selectBox = document.getElementById("selectedObj");
+    selectedObject = objects[parseInt(selectBox.value)];
 }
 
 function deleteObject() {
+    if (selectedObject instanceof myLightSource) {
+        alert("不能删除光源！");
+        return;
+    }
+    objects = objects.filter(obj => obj !== selectedObject);
+    selectedObject = objects[0];
+    objectCount--;
+    changeScene();
+}
 
+function changeSceneColor() {
+    roomColorType = parseInt(document.getElementById("sceneColor").value);
+    changeScene();
+
+}
+
+function moveLight() {
+    let lX = parseFloat(document.getElementById("lightX").value);
+    let lY = parseFloat(document.getElementById("lightY").value);
+    let lZ = parseFloat(document.getElementById("lightZ").value);
+    objects[0].position = Vector.create([lX, lY, lZ]);
+    lightPosTipStr = '光源位置：' + lX + ', ' + lY + ', ' + lZ + '，注意请勿遮挡';
+    document.getElementById("lightTipStr").innerHTML = lightPosTipStr;
+    changeScene();
 }

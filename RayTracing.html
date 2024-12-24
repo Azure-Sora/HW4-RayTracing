@@ -7,6 +7,13 @@
         <canvas id='canvas' width="512" height="512"></canvas>
     </div>
     <div style="text-align: center">
+        <label for="sceneColor">选择房间颜色：</label>
+        <select id="sceneColor" onchange="changeSceneColor()">
+            <option value="0">黄蓝</option>
+            <option value="1">红绿</option>
+            <option value="2">我全都要</option>
+
+        </select>
         <label for="scene">选择预设场景：</label>
         <select id="scene" onchange="newScene()">
             <option value="0">经典场景</option>
@@ -15,6 +22,16 @@
 
         </select>
         <p id="lightTipStr"></p>
+        <div>
+            <label>移动光源：</label>
+            <label for="lightX">光源X</label>
+            <input type="text" id="lightX" size="5">
+            <label for="lightY">光源Y</label>
+            <input type="text" id="lightY" size="5">
+            <label for="lightZ">光源Z</label>
+            <input type="text" id="lightZ" size="5">
+            <button type="button" onclick="moveLight()">移动光源</button>
+        </div>
         <div>
             <label>添加球体：</label>
             <label for="centerX">球心X</label>
@@ -66,6 +83,8 @@
             </select>
             <button type="button" onclick="deleteObject()">删除物体</button>
         </div>
+
+        <label>所有操作需要重新生成并编译着色器，速度较慢，请耐心等待</label>
     </div>
     <script type="text/javascript" src="./common/sylvester.src.js"></script>
     <script type="text/javascript" src="./common/glUtils.js"></script>

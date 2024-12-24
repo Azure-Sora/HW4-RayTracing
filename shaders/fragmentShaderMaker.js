@@ -30,6 +30,12 @@ class myLightSource {
     constructor(position) {
         this.position = position;
     }
+    getMinCorner() {
+        return this.position.subtract(Vector.create([0.1, 0.1, 0.1]));
+    };
+    getMaxCorner() {
+        return this.position.add(Vector.create([0.1, 0.1, 0.1]));
+    };
     makeObject() {
         return 'LightSource light = LightSource(' + vec3ToStr(this.position) + ', 0.8, 0.1);'
     }
@@ -118,7 +124,7 @@ class myCube {
                 specularHighlight = max(0.0, dot(reflectedLight, normalize(hitPoint - origin)));\
                 specularHighlight = pow(specularHighlight, 3.0);' +
                 '}'
-        }
+        };
     }
     getShadow() {
         return '\
@@ -186,7 +192,7 @@ class mySphere {
                 specularHighlight = max(0.0, dot(reflectedLight, normalize(hitPoint - origin)));\
                 specularHighlight = pow(specularHighlight, 3.0);' +
                 '}'
-        }
+        };
     }
     getShadow() {
         return '\
@@ -223,8 +229,6 @@ varying vec3 initialRay;\
 \
 uniform vec3 eye;\
 \
-uniform vec3 center;\
-uniform float radius;\
 float seed = 0.93725856;\
 struct Cube {\
     vec3 minCorner;\
